@@ -1,5 +1,25 @@
 ## [Unreleased]
 
+## [0.33.1] - 2026-11-14
+
+### Security
+
+- Ownership guards against cross-user IDOR: creating/updating splits now verifies that the referenced transaction and destination account belong to the requesting user, and account create/update verifies the target book does; foreign ids are rejected with `404` on all mutating endpoints (add/update/delete)
+- Account balance queries filter splits by `user_id` in the join, so pre-existing poisoned rows cannot skew other users' balances (defense in depth)
+- Require CSRF check on the settings POST endpoint (dropped `#[NoCSRFRequired]`; the frontend already sends the request token via @nextcloud/axios)
+- Cap settings values server-side at 64 characters (`400` on longer input)
+- Sanitize audit log messages: control characters (incl. newlines, which could forge log lines) are replaced and values are capped at 200 chars
+- CSV import: reject files larger than 10 MB client-side with a translated error
+- Write the app signing key/certificate with `0600` permissions in `npm run sign`
+- Pin `SMillerDev/nextcloud-actions` workflows steps to a full commit SHA instead of `@main`, and add `SECURITY.md` with private reporting instructions
+- Bump `csv-parse` to ^7.0.2 and `npm audit fix` the dev toolchain (vite & vitest advisory chains; 32 → 18 audit findings, remaining ones require breaking major bumps or have no fix)
+- Test infrastructure only: a scoped `p-queue` override in `package.json` pins p-queue to 9.0.0 under `@nextcloud/vue`; per npm's override scoping this also forces 9.0.0 on the hoisted `@nextcloud/dialogs` and `@nextcloud/files` transitive chains (API-compatible today — they only use `PQueue({concurrency})` and `.add()`). Needed after the `@nextcloud/vue` 9.14.1 float picked up p-queue 9.3.5, whose `setMaxListeners` call crashes the vitest suite; revisit on the next `@nextcloud/*` upgrade (proper fix: vue/dialogs majors compatible with p-queue 10, then delete the override)
+
+### Fixed
+
+- Remove leftover `:use_id` placeholder typo in `TransactionMapper::findAll` (query referenced an unbound parameter name while binding `:user_id`)
+- `GET /account/{id}` on a missing account returns `404` instead of an `IndexOutOfBoundsException` (`500`)
+
 ## [0.33.0] - 2026-11-14
 
 ### Added

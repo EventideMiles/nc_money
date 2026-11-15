@@ -16,7 +16,7 @@ trait AuditTrait {
     $this->emitAuditEvent('user \'%s\' created a %s: %s', [
       $userId,
       $entityName,
-      json_encode($entity)
+      $this->sanitizeAuditValue(json_encode($entity))
     ]);
   }
 
@@ -48,7 +48,7 @@ trait AuditTrait {
     $this->emitAuditEvent('user \'%s\' deleted %s: %s', [
       $userId,
       $entityName,
-      json_encode($entity)
+      $this->sanitizeAuditValue(json_encode($entity))
     ]);
   }
 
@@ -70,10 +70,31 @@ trait AuditTrait {
     $lines = [];
 
     foreach($changes as $key => $value) {
-      array_push($lines, 'changed ' . $key . ' from ' . $oldEntity[$key] . ' to ' . $value);
+      array_push($lines, 'changed ' . $key . ' from ' . $this->sanitizeAuditValue($oldEntity[$key]) . ' to ' . $this->sanitizeAuditValue($value));
     }
 
     return $lines;
+  }
+
+  /**
+   * Entity values end up verbatim in the audit log message. Strip control
+   * characters (including newlines, which would forge additional log lines)
+   * and cap the length so oversized values cannot flood the log.
+   */
+  private function sanitizeAuditValue($value): string {
+    if(is_null($value) || is_array($value)) {
+      $string = json_encode($value);
+    } else {
+      $string = (string) $value;
+    }
+
+    $string = preg_replace('/[\x00-\x1F\x7F]/', ' ', $string) ?? '';
+
+    if(mb_strlen($string) > 200) {
+      $string = mb_substr($string, 0, 200);
+    }
+
+    return $string;
   }
 
   private function getDispatcher(): IEventDispatcher {

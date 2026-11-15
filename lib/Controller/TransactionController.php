@@ -80,9 +80,10 @@ class TransactionController extends MoneyController {
    */
   #[NoAdminRequired]
   public function updateTransaction($id, $description, $date) {
-    $transaction = $this->transactionService->update($id, $description, $date, $this->userId);
-    $transaction = $this->getTransaction($transaction->id);
-    return $transaction;
+    return $this->handleNotFound(function() use ($id, $description, $date) {
+      $transaction = $this->transactionService->update($id, $description, $date, $this->userId);
+      return $this->getTransaction($transaction->id);
+    });
   }
 
   /**

@@ -9,6 +9,8 @@ use OCP\AppFramework\Db\MultipleObjectsReturnedException;
 
 use OCA\Money\Db\Split;
 use OCA\Money\Db\SplitMapper;
+use OCA\Money\Db\TransactionMapper;
+use OCA\Money\Db\AccountMapper;
 
 use OCA\Money\AuditTrait;
 
@@ -17,9 +19,13 @@ class SplitService {
   use AuditTrait;
 
   private $splitMapper;
+  private $transactionMapper;
+  private $accountMapper;
 
-  public function __construct(SplitMapper $splitMapper) {
+  public function __construct(SplitMapper $splitMapper, TransactionMapper $transactionMapper, AccountMapper $accountMapper) {
     $this->splitMapper = $splitMapper;
+    $this->transactionMapper = $transactionMapper;
+    $this->accountMapper = $accountMapper;
   }
 
   public function findAll($userId) {
@@ -33,6 +39,16 @@ class SplitService {
     } else {
       throw $e;
     }
+  }
+
+  /**
+   * Ensures the transaction and destination account referenced by a split
+   * belong to the requesting user — a split must never point at another
+   * user's rows (cross-user IDOR).
+   */
+  private function assertOwnership($transactionId, $destAccountId, $userId) {
+    $this->transactionMapper->find($transactionId, $userId);
+    $this->accountMapper->find($destAccountId, $userId);
   }
 
   public function find($id, $userId) {
@@ -52,6 +68,12 @@ class SplitService {
   }
 
   public function create($transactionId, $destAccountId, $value, $convertRate, $description, $userId) {
+    try {
+      $this->assertOwnership($transactionId, $destAccountId, $userId);
+    } catch(Exception $e) {
+      $this->handleException($e);
+    }
+
     $split = new Split();
     $split->setUserId($userId);
 
@@ -72,6 +94,8 @@ class SplitService {
     try {
       $split = $this->splitMapper->find($id, $userId);
       $originalSplit = clone $split;
+
+      $this->assertOwnership($transactionId, $destAccountId, $userId);
 
       $split->setDescription($description);
       $split->setTransactionId($transactionId);

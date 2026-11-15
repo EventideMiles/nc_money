@@ -27,7 +27,7 @@ class TransactionMapper extends QBMapper {
     $qb = $this->db->getQueryBuilder();
     $qb->select('*')
       ->from($this->tableName)
-      ->where('user_id = :use_id')
+      ->where('user_id = :user_id')
       ->setParameter('user_id', $userId);
 
     return $this->findEntities($qb);
