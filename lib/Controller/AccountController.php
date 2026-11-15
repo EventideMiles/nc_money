@@ -9,6 +9,7 @@ use OCP\IDBConnection;
 
 use OCA\Money\Controller\MoneyController;
 use OCA\Money\Service\AccountService;
+use OCA\Money\Service\NotFoundException;
 use OCP\AppFramework\Http\Attribute\NoAdminRequired;
 
 class AccountController extends MoneyController {
@@ -39,6 +40,16 @@ class AccountController extends MoneyController {
    */
   #[NoAdminRequired]
   public function getAccount($id) {
+    return $this->handleNotFound(function() use ($id) {
+      return $this->fetchAccountWithBalances($id);
+    });
+  }
+
+  /**
+   * @param int $id
+   * @throws NotFoundException when the account does not exist for the user
+   */
+  private function fetchAccountWithBalances($id) {
     $qb = $this->createQueryBuilderForAccount();
 
     $qb->andWhere('a.id = :id')
@@ -49,7 +60,13 @@ class AccountController extends MoneyController {
     $rows = $result->fetchAll();
     $result->closeCursor();
 
-    return array_values($this->transformAccountRowsWithBalances($rows))[0];
+    $accounts = array_values($this->transformAccountRowsWithBalances($rows));
+
+    if (count($accounts) === 0) {
+      throw new NotFoundException('Account not found');
+    }
+
+    return $accounts[0];
   }
 
   private function createQueryBuilderForAccount() {
@@ -64,7 +81,7 @@ class AccountController extends MoneyController {
       ->selectAlias($qb->createFunction('SUM(b.value)'), 'balance')
       ->selectAlias($qb->createFunction('SUM(SUM(b.value)) OVER (PARTITION BY a.id ORDER BY EXTRACT(YEAR FROM c.date), EXTRACT(MONTH FROM c.date))'), 'running_balance')
       ->from('money_accounts', 'a')
-      ->leftJoin('a', 'money_splits', 'b', 'b.dest_account_id = a.id')
+      ->leftJoin('a', 'money_splits', 'b', 'b.dest_account_id = a.id AND b.user_id = :user_id')
       ->leftJoin('b', 'money_transactions', 'c', 'b.transaction_id = c.id')
       ->where('a.user_id = :user_id')
       ->groupBy($yearFunction, $monthFunction, 'a.id');
@@ -86,17 +103,19 @@ class AccountController extends MoneyController {
     $extraData,
     $bookId
   ) {
-    $this->accountService->update(
-      $id,
-      $name,
-      $type,
-      $currency,
-      $description,
-      $extraData,
-      $this->userId,
-      $bookId
-    );
-    return $this->getAccount($id);
+    return $this->handleNotFound(function() use ($id, $name, $type, $currency, $description, $extraData, $bookId) {
+      $this->accountService->update(
+        $id,
+        $name,
+        $type,
+        $currency,
+        $description,
+        $extraData,
+        $this->userId,
+        $bookId
+      );
+      return $this->fetchAccountWithBalances($id);
+    });
   }
 
   /**
@@ -111,16 +130,18 @@ class AccountController extends MoneyController {
     $extraData,
     $bookId
   ) {
-    $response = $this->accountService->create(
-      $name,
-      $type,
-      $currency,
-      $description,
-      $extraData,
-      $this->userId,
-      $bookId
-    );
-    return $this->getAccount($response->id);
+    return $this->handleNotFound(function() use ($name, $type, $currency, $description, $extraData, $bookId) {
+      $account = $this->accountService->create(
+        $name,
+        $type,
+        $currency,
+        $description,
+        $extraData,
+        $this->userId,
+        $bookId
+      );
+      return $this->fetchAccountWithBalances($account->id);
+    });
   }
 
   /**

@@ -5,12 +5,15 @@ namespace OCA\Money\Controller;
 use OCP\IConfig;
 use OCP\IRequest;
 
+use OCP\AppFramework\Http;
 use OCP\AppFramework\Http\DataResponse;
 use OCP\AppFramework\Controller;
 use OCP\AppFramework\Http\Attribute\NoAdminRequired;
 use OCP\AppFramework\Http\Attribute\NoCSRFRequired;
 
 class SettingsController extends Controller {
+
+  private const MAX_SETTING_LENGTH = 64;
 
   private $userId;
   private IConfig $settings;
@@ -63,7 +66,6 @@ class SettingsController extends Controller {
     return $data;
   }
 
-  #[NoCSRFRequired]
   #[NoAdminRequired]
   public function updateSettings(
     $useInvertedAccounts,
@@ -87,6 +89,13 @@ class SettingsController extends Controller {
     foreach($settings as $setting => $value) {
       if(is_bool($value)) {
         $value = $value ? '1' : '0';
+      }
+
+      if(is_string($value) && mb_strlen($value) > self::MAX_SETTING_LENGTH) {
+        return new DataResponse(
+          ['message' => 'Setting "' . $setting . '" exceeds the maximum length of ' . self::MAX_SETTING_LENGTH . ' characters'],
+          Http::STATUS_BAD_REQUEST
+        );
       }
 
       $this->settings->setUserValue(

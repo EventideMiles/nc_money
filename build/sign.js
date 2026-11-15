@@ -6,7 +6,8 @@ function writeEnvToFile(envName, fileName) {
   const value = process.env[envName];
   if (!value) throw new Error('env variable has no value:' + envName);
 
-  fs.writeFileSync(fileName, value);
+  // 0o600 so the signing key/cert are never readable by other users
+  fs.writeFileSync(fileName, value, { mode: 0o600 });
 }
 
 console.log('writing key/cert file');

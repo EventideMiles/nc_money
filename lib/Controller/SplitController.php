@@ -36,7 +36,9 @@ class SplitController extends MoneyController {
    */
   #[NoAdminRequired]
   public function updateSplit($id, $transactionId, $destAccountId, $value, $convertRate, $description) {
-    return $this->splitService->update($id, $transactionId, $destAccountId, $value, $convertRate, $description, $this->userId);
+    return $this->handleNotFound(function() use ($id, $transactionId, $destAccountId, $value, $convertRate, $description) {
+      return $this->splitService->update($id, $transactionId, $destAccountId, $value, $convertRate, $description, $this->userId);
+    });
   }
 
   /**
@@ -47,7 +49,9 @@ class SplitController extends MoneyController {
    */
   #[NoAdminRequired]
   public function addSplit($transactionId, $destAccountId, $value, $convertRate, $description) {
-    return $this->splitService->create($transactionId, $destAccountId, $value, $convertRate, $description, $this->userId);
+    return $this->handleNotFound(function() use ($transactionId, $destAccountId, $value, $convertRate, $description) {
+      return $this->splitService->create($transactionId, $destAccountId, $value, $convertRate, $description, $this->userId);
+    });
   }
 
   /**

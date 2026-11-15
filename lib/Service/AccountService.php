@@ -9,6 +9,7 @@ use OCP\AppFramework\Db\MultipleObjectsReturnedException;
 
 use OCA\Money\Db\Account;
 use OCA\Money\Db\AccountMapper;
+use OCA\Money\Db\BookMapper;
 
 use OCA\Money\AuditTrait;
 
@@ -17,9 +18,11 @@ class AccountService {
   use AuditTrait;
 
   private $mapper;
+  private $bookMapper;
 
-  public function __construct(AccountMapper $mapper) {
+  public function __construct(AccountMapper $mapper, BookMapper $bookMapper) {
     $this->mapper = $mapper;
+    $this->bookMapper = $bookMapper;
   }
 
   public function findAll($userId) {
@@ -60,6 +63,15 @@ class AccountService {
     $account->setExtraData($extraData);
 
     $account->setUserId($userId);
+
+    // Same ownership rule as update(): an account must never be created
+    // inside another user's book (cross-user IDOR).
+    try {
+      $this->bookMapper->find($bookId, $userId);
+    } catch(Exception $e) {
+      $this->handleException($e);
+    }
+
     $account->setBookId($bookId);
 
     $insertedAccount = $this->mapper->insert($account);
@@ -82,6 +94,10 @@ class AccountService {
     try {
       $account = $this->mapper->find($id, $userId);
       $originalAccount = clone $account;
+
+      // The book must belong to the requesting user as well — an account
+      // must never be moved into another user's book (cross-user IDOR).
+      $this->bookMapper->find($bookId, $userId);
 
       $account->setBookId($bookId);
 

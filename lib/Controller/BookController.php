@@ -40,12 +40,14 @@ class BookController extends MoneyController {
     $name,
     $description
   ) {
-    return $this->bookService->update(
-      $id,
-      $name,
-      $description,
-      $this->userId
-    );
+    return $this->handleNotFound(function() use ($id, $name, $description) {
+      return $this->bookService->update(
+        $id,
+        $name,
+        $description,
+        $this->userId
+      );
+    });
   }
 
   #[NoAdminRequired]

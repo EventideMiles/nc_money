@@ -64,7 +64,7 @@ jobs:
           coverage: none
 
       - name: Set up server with SQL
-        uses: SMillerDev/nextcloud-actions/setup-nextcloud@main
+        uses: SMillerDev/nextcloud-actions/setup-nextcloud@9088c021dc5f30e36dba59229d00f601cf35a07f
         with:
           cron: false
           version: ${{ env.NC_VERSION }}
@@ -76,7 +76,7 @@ jobs:
           database-password: ${{ env.POSTGRES_PASSWORD }}
 
       - name: Configure server with app
-        uses: SMillerDev/nextcloud-actions/setup-nextcloud-app@main
+        uses: SMillerDev/nextcloud-actions/setup-nextcloud-app@9088c021dc5f30e36dba59229d00f601cf35a07f
         with:
           app: ${{ env.APP_NAME }}
 

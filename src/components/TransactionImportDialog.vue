@@ -152,6 +152,7 @@
   import { parse } from 'csv-parse/browser/esm/sync';
   import dayjs from 'dayjs';
 
+  import { showError } from '@nextcloud/dialogs';
   import { translate as t } from '@nextcloud/l10n';
 
   import { computed, reactive, ref, type Ref } from 'vue';
@@ -190,6 +191,8 @@
   const emit = defineEmits(['close', 'transactions-imported']);
 
   const isImporting = ref(false);
+
+  const maxFileSizeBytes = 10 * 1024 * 1024;
 
   const columns: Columns = reactive({
     date: {
@@ -277,6 +280,16 @@
 
   async function handleFileChanged(file: File | null): Promise<void> {
     if (!file) throw new Error('cannot import transactions without a csv file');
+
+    if (file.size > maxFileSizeBytes) {
+      showError(
+        t(
+          'money',
+          'The file is too large to import. The maximum size is 10 MB.'
+        )
+      );
+      return;
+    }
 
     await readFile(file);
   }

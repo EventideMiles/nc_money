@@ -73,7 +73,7 @@ jobs:
           coverage: none
 
       - name: Set up server with MariaDB
-        uses: SMillerDev/nextcloud-actions/setup-nextcloud@main
+        uses: SMillerDev/nextcloud-actions/setup-nextcloud@9088c021dc5f30e36dba59229d00f601cf35a07f
         if: ${{ matrix.db == 'mysql' }}
         with:
           cron: false
@@ -86,7 +86,7 @@ jobs:
           database-password: nextcloud
 
       - name: Set up server with PostgreSQL
-        uses: SMillerDev/nextcloud-actions/setup-nextcloud@main
+        uses: SMillerDev/nextcloud-actions/setup-nextcloud@9088c021dc5f30e36dba59229d00f601cf35a07f
         if: ${{ matrix.db == 'pgsql' }}
         with:
           cron: false

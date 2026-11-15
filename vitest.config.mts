@@ -18,7 +18,7 @@ export default defineConfig({
     exclude: [...configDefaults.exclude],
     server: {
       deps: {
-        inline: ['@nextcloud/vue']
+        inline: ['@nextcloud/vue', '@nextcloud/dialogs']
       }
     }
   }
