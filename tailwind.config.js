@@ -9,6 +9,7 @@ module.exports = {
         'main-text': 'var(--color-main-text)',
         'text-maxcontrast': 'var(--color-text-maxcontrast)',
         'border-dark': 'var(--color-border-dark)',
+        border: 'var(--color-border)',
         'main-background': 'var(--color-main-background)',
         'background-dark': 'var(--color-background-dark)',
         'background-darker': 'var(--color-background-darker)',

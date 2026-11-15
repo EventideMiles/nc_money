@@ -60,6 +60,41 @@
     --vs-border-color: var(--color-primary-element);
   }
 
+  /*
+   * The menu is teleported to document.body (`append-to-body`), so it cannot
+   * inherit the --vs-* variables declared on .account-select. Re-declare the
+   * full set here so the menu resolves against Nextcloud's body-level theme
+   * variables in both light and dark themes — the same approach
+   * @nextcloud/vue's NcSelect documents in NcSelect.css:
+   * ".nc-select.v-select.select, .nc-select__dropdown.vs__dropdown-menu".
+   */
+  .vs__dropdown-menu {
+    --vs-dropdown-bg: var(--color-main-background);
+    --vs-dropdown-color: var(--color-main-text);
+    --vs-dropdown-box-shadow: 0 3px 6px 0
+      var(--color-box-shadow, rgba(0, 0, 0, 0.3));
+
+    --vs-dropdown-option-color: var(--color-main-text);
+    --vs-dropdown-option--active-bg: var(--color-background-hover);
+    --vs-dropdown-option--active-color: var(--color-main-text);
+    --vs-dropdown-option--deselect-bg: var(--color-error);
+
+    --vs-state-disabled-bg: var(--color-background-darker);
+    --vs-state-disabled-color: var(--color-text-maxcontrast);
+
+    --vs-search-input-bg: var(--color-main-background);
+    --vs-search-input-color: var(--color-main-text);
+    --vs-search-input-placeholder-color: var(--color-text-maxcontrast);
+
+    --vs-selected-bg: var(--color-background-hover);
+    --vs-selected-color: var(--color-main-text);
+
+    --vs-controls-color: var(--color-main-text);
+
+    --vs-disabled-bg: var(--color-background-darker);
+    --vs-disabled-color: var(--color-text-maxcontrast);
+  }
+
   .account-select {
     --vs-dropdown-bg: var(--color-main-background);
 
