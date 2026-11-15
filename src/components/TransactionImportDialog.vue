@@ -30,7 +30,7 @@
           <div>
             <label> {{ t('money', 'Column Separator') }}: </label>
             <select
-              class="w-full"
+              class="w-full border border-solid border-border bg-main-background text-main-text hover:border-primary-element focus:border-primary-element"
               v-model="columnSeparator"
               @change="handleColumnSeparatorChanged"
             >
@@ -46,7 +46,7 @@
           <div>
             <label> {{ t('money', 'Decimal Separator') }}: </label>
             <select
-              class="w-full"
+              class="w-full border border-solid border-border bg-main-background text-main-text hover:border-primary-element focus:border-primary-element"
               v-model="decimalSeparator"
               @change="handleDecimalSeparatorChanged"
             >
@@ -62,7 +62,7 @@
           <div>
             <label> {{ t('money', 'Date Format') }}: </label>
             <input
-              class="w-full"
+              class="w-full border border-solid border-border bg-main-background text-main-text hover:border-primary-element focus:border-primary-element"
               v-model="dateFormat"
               @change="handleDateFormatChanged"
             />
@@ -83,7 +83,7 @@
             <div>{{ column.name }}</div>
             <div>
               <select
-                class="w-full"
+                class="w-full border border-solid border-border bg-main-background text-main-text hover:border-primary-element focus:border-primary-element"
                 :class="{
                   'border-red-500': !columnIsValid(column)
                 }"

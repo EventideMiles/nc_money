@@ -1,6 +1,6 @@
 <template>
-  <div class="relative border-[2px] border-dashed border-gray-300 p-3">
-    <div class="text-center text-xl text-gray-300">
+  <div class="relative border-[2px] border-dashed border-border p-3">
+    <div class="text-center text-xl text-text-maxcontrast">
       <slot>Click/Drop here!</slot>
     </div>
     <input

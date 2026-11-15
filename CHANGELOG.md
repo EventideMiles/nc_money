@@ -1,5 +1,15 @@
 ## [Unreleased]
 
+## [0.33.2] - 2026-11-14
+
+### Fixed
+
+- Dark mode: vue-select dropdown menu in the account select now follows the Nextcloud theme — the menu is teleported to `document.body` (`append-to-body`) and could not inherit the `--vs-*` variables declared on the control, so the library's light defaults applied; all menu-relevant `--vs-*` variables are now re-declared globally on `.vs__dropdown-menu` against Nextcloud variables (the same approach `@nextcloud/vue`'s NcSelect uses), fixing light-on-dark menus in dark themes
+- Dark mode: date picker input text color now actually applies (the re-skin selectors carried a foreign scoped-style attribute `data-v-cd1afd2` that never matched), and leftover light-only colors in the vendored datepicker CSS were mapped to Nextcloud variables (`.mx-btn` border/text, `.mx-btn:hover`, scrollbar thumb, disabled input state); removed the dead `.vs__dropdown-menu--floating` rule (no plain vue-select menu carries that class in this app)
+- Dark mode: native `<select>` and `<input>` controls in the transaction import dialog now use Nextcloud theme variables (background, text, border, hover/focus) instead of unthemed browser defaults
+- Dark mode: file drop zone border/text now use Nextcloud variables instead of fixed gray Tailwind colors
+- Dark mode: the `data-theme-dark` attribute is now set on the actual mount container `#content` (the previous `#content-vue` target does not exist), so Tailwind `dark:` utilities work for the default theme combined with an OS-level dark preference
+
 ## [0.33.1] - 2026-11-14
 
 ### Security

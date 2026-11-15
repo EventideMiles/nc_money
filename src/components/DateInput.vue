@@ -79,15 +79,15 @@
     cursor: pointer;
     background-color: transparent;
     outline: none;
-    border: 1px solid rgba(0, 0, 0, 0.1);
+    border: 1px solid var(--color-border);
     border-radius: 4px;
-    color: #73879c;
+    color: var(--color-text-maxcontrast);
     white-space: nowrap;
   }
 
   .mx-btn:hover {
-    border-color: #1284e7;
-    color: #1284e7;
+    border-color: var(--color-primary-element);
+    color: var(--color-primary-element);
   }
 
   .mx-btn-text {
@@ -129,7 +129,7 @@
     height: 0;
     cursor: pointer;
     border-radius: inherit;
-    background-color: #9093994d;
+    background-color: var(--color-border-dark);
     transition: background-color 0.3s;
   }
 
@@ -206,9 +206,9 @@
 
   .mx-input:disabled,
   .mx-input.disabled {
-    color: #ccc;
-    background-color: #f3f3f3;
-    border-color: #ccc;
+    color: var(--color-border);
+    background-color: var(--color-background-darker);
+    border-color: var(--color-border);
     cursor: not-allowed;
   }
 
@@ -432,43 +432,38 @@
     height: 270px;
   }
 
-  .mx-datepicker[data-v-cd1afd2] {
+  .date-input.mx-datepicker {
     -webkit-user-select: none;
     user-select: none;
     color: var(--color-main-text);
   }
 
-  .mx-datepicker[data-v-cd1afd2] svg {
+  .date-input.mx-datepicker svg {
     fill: var(--color-main-text);
   }
 
-  .mx-datepicker[data-v-cd1afd2] .mx-input-wrapper .mx-input {
+  .date-input.mx-datepicker .mx-input-wrapper .mx-input {
     width: 100%;
+    color: var(--color-main-text);
     border: 2px solid var(--color-border-maxcontrast);
     background-color: var(--color-main-background);
     background-clip: content-box;
   }
 
-  .mx-datepicker[data-v-cd1afd2]
-    .mx-input-wrapper
-    .mx-input:active:not(.disabled),
-  .mx-datepicker[data-v-cd1afd2]
-    .mx-input-wrapper
-    .mx-input:hover:not(.disabled),
-  .mx-datepicker[data-v-cd1afd2]
-    .mx-input-wrapper
-    .mx-input:focus:not(.disabled) {
+  .date-input.mx-datepicker .mx-input-wrapper .mx-input:active:not(.disabled),
+  .date-input.mx-datepicker .mx-input-wrapper .mx-input:hover:not(.disabled),
+  .date-input.mx-datepicker .mx-input-wrapper .mx-input:focus:not(.disabled) {
     border-color: var(--color-primary-element);
   }
 
-  .mx-datepicker[data-v-cd1afd2] .mx-input-wrapper:disabled,
-  .mx-datepicker[data-v-cd1afd2] .mx-input-wrapper.disabled {
+  .date-input.mx-datepicker .mx-input-wrapper:disabled,
+  .date-input.mx-datepicker .mx-input-wrapper.disabled {
     cursor: not-allowed;
     opacity: 0.7;
   }
 
-  .mx-datepicker[data-v-cd1afd2] .mx-input-wrapper .mx-icon-calendar,
-  .mx-datepicker[data-v-cd1afd2] .mx-input-wrapper .mx-icon-clear {
+  .date-input.mx-datepicker .mx-input-wrapper .mx-icon-calendar,
+  .date-input.mx-datepicker .mx-input-wrapper .mx-icon-clear {
     color: var(--color-text-lighter);
   }
 
@@ -843,10 +838,6 @@
     justify-self: center;
     align-items: center;
     justify-content: center;
-  }
-
-  .vs__dropdown-menu--floating {
-    z-index: 100001 !important;
   }
 </style>
 
