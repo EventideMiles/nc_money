@@ -23,7 +23,7 @@ class PersonalSettings implements ISettings {
 
   public function getForm() {
     Util::addScript($this->appName, 'money-personal-settings.iife');
-    Util::addStyle($this->appName, '../js/money-personal-settings');
+    Util::addStyle($this->appName, 'money-personal-settings');
 
     $response = new TemplateResponse($this->appName, 'personalSettings');
 

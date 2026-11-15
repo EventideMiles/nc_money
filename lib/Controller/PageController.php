@@ -8,6 +8,8 @@ use OCP\Util;
 use OCP\AppFramework\Controller;
 use OCP\AppFramework\Http\TemplateResponse;
 use OCP\AppFramework\Http\ContentSecurityPolicy;
+use OCP\AppFramework\Http\Attribute\NoAdminRequired;
+use OCP\AppFramework\Http\Attribute\NoCSRFRequired;
 use OCP\IConfig;
 
 class PageController extends Controller {
@@ -24,13 +26,11 @@ class PageController extends Controller {
     $this->config = $config;
   }
 
-  /**
-   * @NoAdminRequired
-   * @NoCSRFRequired
-   */
+  #[NoAdminRequired]
+  #[NoCSRFRequired]
   public function index() {
     Util::addScript($this->appName, 'money-main.iife');
-    Util::addStyle($this->appName, '../js/money-main');
+    Util::addStyle($this->appName, 'money-main');
 
     $response = new TemplateResponse($this->appName, 'main');
 

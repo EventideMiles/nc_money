@@ -9,6 +9,7 @@ use OCP\IDBConnection;
 
 use OCA\Money\Controller\MoneyController;
 use OCA\Money\Service\AccountService;
+use OCP\AppFramework\Http\Attribute\NoAdminRequired;
 
 class AccountController extends MoneyController {
 
@@ -20,9 +21,7 @@ class AccountController extends MoneyController {
     $this->accountService = $accountService;
   }
 
-  /**
-   * @NoAdminRequired
-   */
+  #[NoAdminRequired]
   public function getAccounts() {
     $qb = $this->createQueryBuilderForAccount();
 
@@ -36,10 +35,9 @@ class AccountController extends MoneyController {
   }
 
   /**
-   * @NoAdminRequired
-   *
    * @param int $id
    */
+  #[NoAdminRequired]
   public function getAccount($id) {
     $qb = $this->createQueryBuilderForAccount();
 
@@ -75,11 +73,10 @@ class AccountController extends MoneyController {
   }
 
   /**
-   * @NoAdminRequired
-   *
    * @param int $id
    * @param int $type
    */
+  #[NoAdminRequired]
   public function updateAccount(
     $id,
     $name,
@@ -103,10 +100,9 @@ class AccountController extends MoneyController {
   }
 
   /**
-   * @NoAdminRequired
-   *
    * @param int $type
    */
+  #[NoAdminRequired]
   public function addAccount(
     $name,
     $type,
@@ -128,10 +124,9 @@ class AccountController extends MoneyController {
   }
 
   /**
-   * @NoAdminRequired
-   *
    * @param int $id
    */
+  #[NoAdminRequired]
   public function deleteAccount($id) {
     return $this->handleNotFound(function() use ($id) {
       return $this->accountService->delete($id, $this->userId);

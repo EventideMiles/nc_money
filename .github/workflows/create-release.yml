@@ -15,7 +15,7 @@ on:
 
 env:
   PHP_VERSION: 8.4
-  NC_VERSION: stable34
+  NC_VERSION: stable35
   APP_NAME: money
   POSTGRES_PASSWORD: nextcloud
 

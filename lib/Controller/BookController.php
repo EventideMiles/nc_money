@@ -9,6 +9,7 @@ use OCP\IDBConnection;
 
 use OCA\Money\Controller\MoneyController;
 use OCA\Money\Service\BookService;
+use OCP\AppFramework\Http\Attribute\NoAdminRequired;
 
 class BookController extends MoneyController {
 
@@ -20,25 +21,20 @@ class BookController extends MoneyController {
     $this->bookService = $bookService;
   }
 
-  /**
-   * @NoAdminRequired
-   */
+  #[NoAdminRequired]
   public function getBooks() {
     return $this->bookService->findAll($this->userId);
   }
 
   /**
-   * @NoAdminRequired
-   *
    * @param int $id
    */
+  #[NoAdminRequired]
   public function getBook($id) {
     return $this->bookService->find($id, $this->userId);
   }
 
-  /**
-   * @NoAdminRequired
-   */
+  #[NoAdminRequired]
   public function updateBook(
     $id,
     $name,
@@ -52,9 +48,7 @@ class BookController extends MoneyController {
     );
   }
 
-  /**
-   * @NoAdminRequired
-   */
+  #[NoAdminRequired]
   public function addBook(
     $name,
     $description
@@ -67,10 +61,9 @@ class BookController extends MoneyController {
   }
 
   /**
-   * @NoAdminRequired
-   *
    * @param int $id
    */
+  #[NoAdminRequired]
   public function deleteBook($id) {
     return $this->handleNotFound(function() use ($id) {
       return $this->bookService->delete($id, $this->userId);

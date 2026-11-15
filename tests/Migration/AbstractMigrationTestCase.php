@@ -4,7 +4,6 @@ namespace OCA\Money\tests\Migration;
 
 use Exception;
 
-use Doctrine\DBAL\Schema\Table;
 use OC\DB\Connection;
 use OC\DB\MigrationService;
 use OC\DB\SchemaWrapper;
@@ -114,13 +113,13 @@ abstract class AbstractMigrationTestCase extends TestCase {
 
   private function resetDb(): void {
     $allTables = $this->schema->getTables();
-    $tables = array_filter($allTables, function (Table $t) {
+    // No class type-hint on the table objects on purpose: since Nextcloud 35 the
+    // schema wrapper returns OCP\DB\Schema\Table objects instead of
+    // Doctrine\DBAL\Schema\Table - both expose getName().
+    $tables = array_filter($allTables, function ($t) {
       return str_starts_with($t->getName(), 'oc_money');
     });
 
-    /**
-     * @var Table $t
-     */
     foreach ($tables as $t) {
       $name = preg_replace('/^oc_/', '', $t->getName());
       $this->schema->dropTable($name);

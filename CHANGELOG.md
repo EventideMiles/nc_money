@@ -1,5 +1,15 @@
 ## [Unreleased]
 
+## [0.33.0] - 2026-11-14
+
+### Changed
+
+- Nextcloud 35 compatibility: DBAL-4-safe migrations (typed column setters instead of `Doctrine\DBAL\Types\Type` instances) and PHP attributes instead of legacy controller annotations
+- Raise Nextcloud max-version to 99 (personal fork, sideloaded — avoid future version gates; min-version stays 30, so the legacy `agpl` licence shorthand remains valid)
+- Ship stylesheets from `css/` instead of the `../js/` path-escape hack in `Util::addStyle` call sites
+- Refresh @nextcloud libraries: router 3, l10n 3, dialogs 8, axios 2.6 (toast styles are now bundled by dialogs itself)
+- CI: run integration tests against stable34 and stable35, build releases on stable35
+
 ## [0.32.0] - 2026-07-18
 
 - Enable app for NC 34

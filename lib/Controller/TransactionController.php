@@ -8,6 +8,7 @@ use OCP\IDBConnection;
 use OCA\Money\Controller\MoneyController;
 use OCA\Money\Service\TransactionService;
 use OCA\Money\Service\SplitService;
+use OCP\AppFramework\Http\Attribute\NoAdminRequired;
 
 class TransactionController extends MoneyController {
 
@@ -22,12 +23,11 @@ class TransactionController extends MoneyController {
   }
 
   /**
-  * @NoAdminRequired
-  *
   * @param int $accountId
   * @param int $resultOffset
   * @param int $resultLimit
   */
+  #[NoAdminRequired]
   public function getTransactionsForAccount($accountId, $resultOffset = 0, $resultLimit = 50) {
     $transactions = $this->transactionService->findTransactionsOfAccount($accountId, $this->userId, $resultOffset, $resultLimit);
 
@@ -43,12 +43,11 @@ class TransactionController extends MoneyController {
   }
 
   /**
-  * @NoAdminRequired
-  *
   * @param int $accountId
   * @param string $startDate
   * @param string $endDate
   */
+  #[NoAdminRequired]
   public function getTransactionsForAccountByDate($accountId, $startDate, $endDate) {
     $transactions = $this->transactionService->findTransactionsOfAccountByDate($accountId, $this->userId, $startDate, $endDate);
 
@@ -64,10 +63,9 @@ class TransactionController extends MoneyController {
   }
 
   /**
-  * @NoAdminRequired
-  *
   * @param int $transactionId
   */
+  #[NoAdminRequired]
   public function getTransaction($transactionId) {
     $transaction = $this->transactionService->find($transactionId, $this->userId);
 
@@ -78,10 +76,9 @@ class TransactionController extends MoneyController {
   }
 
   /**
-   * @NoAdminRequired
-   *
    * @param int $id
    */
+  #[NoAdminRequired]
   public function updateTransaction($id, $description, $date) {
     $transaction = $this->transactionService->update($id, $description, $date, $this->userId);
     $transaction = $this->getTransaction($transaction->id);
@@ -89,21 +86,19 @@ class TransactionController extends MoneyController {
   }
 
   /**
-   * @NoAdminRequired
-   *
    * @param $date
    * @param string $description
    */
+  #[NoAdminRequired]
   public function addTransaction($date, $description) {
     return $this->transactionService->create($description, $date, $this->userId);
   }
 
   /**
-   * @NoAdminRequired
-   *
    * @param int $resultOffset
    * @param int $resultLimit
    */
+  #[NoAdminRequired]
   public function getUnbalancedTransactions($resultOffset = 0, $resultLimit = 50) {
     $transactions = $this->transactionService->findUnbalancedTransactions($this->userId, $resultOffset, $resultLimit);
 
