@@ -38,6 +38,7 @@ return [
 
     ['name' => 'transaction#get_transaction', 'url' => '/transactions/{id}', 'verb' => 'GET'],
     ['name' => 'transaction#update_transaction', 'url' => '/transactions/{id}', 'verb' => 'PUT'],
+    ['name' => 'transaction#delete_transaction', 'url' => '/transactions/{id}', 'verb' => 'DELETE'],
     ['name' => 'transaction#add_transaction', 'url' => '/transactions', 'verb' => 'POST'],
 
     ['name' => 'split#get_splits_for_transaction', 'url' => '/splits/get-splits-for-transaction', 'verb' => 'GET'],

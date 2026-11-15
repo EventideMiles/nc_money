@@ -2,6 +2,17 @@
 
 ## [0.33.0] - 2026-11-14
 
+### Added
+
+- Delete transactions end-to-end: per-row delete with 10s undo window in the transaction list (desktop & mobile)
+- Per-split delete button with 10s undo window in the transaction sidebar; deleting the last split of a transaction now deletes the transaction as well
+- Unbalanced transactions view listing all transactions whose splits don't sum to zero, reachable via the "Unbalanced" book navigation entry
+
+### Fixed
+
+- Changing the value of a transaction without a split on the current account no longer silently drops the change; the missing split is created instead
+- Balances stay correct when changing a transaction's date
+
 ### Changed
 
 - Nextcloud 35 compatibility: DBAL-4-safe migrations (typed column setters instead of `Doctrine\DBAL\Types\Type` instances) and PHP attributes instead of legacy controller annotations
@@ -9,6 +20,7 @@
 - Ship stylesheets from `css/` instead of the `../js/` path-escape hack in `Util::addStyle` call sites
 - Refresh @nextcloud libraries: router 3, l10n 3, dialogs 8, axios 2.6 (toast styles are now bundled by dialogs itself)
 - CI: run integration tests against stable34 and stable35, build releases on stable35
+- CI: pin PR check jobs to Node 24 (lockfile requires npm 11)
 
 ## [0.32.0] - 2026-07-18
 

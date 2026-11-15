@@ -86,6 +86,17 @@ class TransactionController extends MoneyController {
   }
 
   /**
+   * @param int $id
+   */
+  #[NoAdminRequired]
+  public function deleteTransaction($id) {
+    return $this->handleNotFound(function() use ($id) {
+      $transaction = $this->transactionService->find($id, $this->userId);
+      return $this->transactionService->delete($transaction);
+    });
+  }
+
+  /**
    * @param $date
    * @param string $description
    */

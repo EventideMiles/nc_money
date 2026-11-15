@@ -4,6 +4,7 @@ import AccountView from './views/AccountView.vue';
 import BookView from './views/BookView.vue';
 import AccountTypeView from './views/AccountTypeView.vue';
 import DashboardView from './views/DashboardView.vue';
+import UnbalancedTransactionsView from './views/UnbalancedTransactionsView.vue';
 import Sidebar from './components/sidebar/SidebarComponent.vue';
 import TransactionSidebar from './components/sidebar/TransactionSidebar.vue';
 import NewTransactionSidebar from './components/sidebar/NewTransactionSidebar.vue';
@@ -89,6 +90,43 @@ export default createRouter({
               return {
                 bookId: Number(route.params.bookId),
                 accountId: Number(route.params.accountId)
+              };
+            }
+          }
+        }
+      ]
+    },
+    {
+      path: '/book/:bookId/unbalanced',
+      name: 'unbalanced',
+      components: {
+        default: UnbalancedTransactionsView
+      },
+      props: {
+        default: (route): { bookId: number } => ({
+          bookId: Number(route.params.bookId)
+        })
+      },
+      children: [
+        {
+          path: 'transaction/:transactionId/details',
+          name: 'unbalanced-transaction-details',
+          meta: {
+            showSidebar: true
+          },
+          components: {
+            sidebar: TransactionSidebar
+          },
+          props: {
+            sidebar: (
+              route
+            ): {
+              bookId: number;
+              transactionId: number;
+            } => {
+              return {
+                bookId: Number(route.params.bookId),
+                transactionId: Number(route.params.transactionId)
               };
             }
           }

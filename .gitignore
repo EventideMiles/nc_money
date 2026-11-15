@@ -10,3 +10,5 @@ translationfiles
 build/dist
 .vscode
 /vendor/
+.opencode/
+tsconfig.tsbuildinfo

@@ -114,7 +114,7 @@ abstract class AbstractMigrationTestCase extends TestCase {
   private function resetDb(): void {
     $allTables = $this->schema->getTables();
     // No class type-hint on the table objects on purpose: since Nextcloud 35 the
-    // schema wrapper returns OCP\DB\Schema\Table objects instead of
+    // schema wrapper returns OCP\DB\Schema\ITable implementations instead of
     // Doctrine\DBAL\Schema\Table - both expose getName().
     $tables = array_filter($allTables, function ($t) {
       return str_starts_with($t->getName(), 'oc_money');

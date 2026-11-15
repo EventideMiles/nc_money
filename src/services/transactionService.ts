@@ -1,5 +1,7 @@
 import { ArrayUtils } from '../utils/arrayUtils';
 
+import dayjs from 'dayjs';
+
 import {
   useTransactionApiService,
   type TransactionCreationData,
@@ -11,6 +13,8 @@ import {
   useTransactionStore,
   type Transaction
 } from '../stores/transactionStore';
+import { useSplitStore } from '../stores/splitStore';
+import { useAccountStore } from '../stores/accountStore';
 import type { Split } from '../stores/splitStore';
 
 let transactionService: TransactionService | null = null;
@@ -20,13 +24,19 @@ export const useTransactionService = (): TransactionService => {
   return transactionService;
 };
 
+export function resetTransactionService(): void {
+  transactionService = null;
+}
+
 class TransactionService {
   private transactionStore = useTransactionStore();
   private transactionApiService = useTransactionApiService();
 
+  private splitStore = useSplitStore();
   private splitService = useSplitService();
 
   private accountService = useAccountService();
+  private accountStore = useAccountStore();
 
   public async reloadTransactions(): Promise<void> {
     const accountId = this.transactionStore.currentAccountId.value;
@@ -113,10 +123,27 @@ class TransactionService {
   }
 
   public async updateTransaction(transaction: Transaction): Promise<void> {
-    // TODO: find better way to support updates of dates!
     await this.transactionStore.insertTransaction(
       await this.transactionApiService.updateTransaction(transaction)
     );
+  }
+
+  public async deleteTransaction(transaction: Transaction): Promise<void> {
+    await this.transactionApiService.deleteTransaction(transaction.id);
+
+    const splits = await this.splitStore.getByTransactionId(transaction.id);
+
+    for (const split of splits) {
+      await this.splitStore.deleteSplit(split.id);
+
+      this.accountStore.addValue({
+        accountId: split.destAccountId,
+        value: -split.value,
+        date: transaction.date ? dayjs(transaction.date).toDate() : undefined
+      });
+    }
+
+    await this.transactionStore.deleteTransaction(transaction.id);
   }
 
   public async addTransactionWithSplits(

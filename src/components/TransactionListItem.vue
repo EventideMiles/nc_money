@@ -8,7 +8,8 @@
     <TransactionListItemTemplate
       class="hidden md:grid"
       :item-class="{
-        'bg-unbalanced dark:bg-unbalanced-dark': isUnbalanced
+        'bg-unbalanced dark:bg-unbalanced-dark': isUnbalanced,
+        'animate-pulse bg-[var(--color-warning)]': isPendingDelete
       }"
     >
       <template #actionFirst>
@@ -21,16 +22,35 @@
         <DateInput
           :date="dayjs(transaction.date).toDate()"
           :placeholder="t('money', 'Date')"
+          :editable="!isPendingDelete"
           @date-changed="handleDateChanged"
         />
       </template>
 
       <template #description>
-        <SeamlessInput
-          :placeholder="t('money', 'Description')"
-          :value="transaction.description"
-          @value-changed="handleDescriptionChanged"
-        />
+        <div class="flex w-full items-center gap-1">
+          <SeamlessInput
+            class="grow"
+            :placeholder="t('money', 'Description')"
+            :value="transaction.description"
+            :disabled="isPendingDelete"
+            @value-changed="handleDescriptionChanged"
+          />
+          <NcIconSvgWrapper
+            v-if="isPendingDelete"
+            :path="mdiUndo"
+            :size="20"
+            :name="t('money', 'Undo')"
+            @click="handleUndoDeleteTransaction"
+          />
+          <NcIconSvgWrapper
+            v-else
+            :path="mdiDelete"
+            :size="20"
+            :name="t('money', 'Delete transaction')"
+            @click="handleDeleteTransaction"
+          />
+        </div>
       </template>
 
       <template #account>
@@ -44,7 +64,7 @@
           v-else
           :book-id="bookId"
           :account-id="destinationAccountId"
-          :editable="valueIsEditable"
+          :editable="valueIsEditable && !isPendingDelete"
           :excluded-account-ids="excludedAccountIds"
           @account-changed="handleDestinationAccountChanged"
         />
@@ -53,7 +73,7 @@
       <template #amount>
         <CurrencyInput
           :value="value"
-          :editable="valueIsEditable"
+          :editable="valueIsEditable && !isPendingDelete"
           :placeholder="t('money', 'Value')"
           :inverted-value="invertedValue"
           @value-changed="handleValueChanged"
@@ -77,7 +97,8 @@
     <MobileTransactionListItemTemplate
       class="md:hidden"
       :item-class="{
-        'bg-unbalanced dark:bg-unbalanced-dark': isUnbalanced
+        'bg-unbalanced dark:bg-unbalanced-dark': isUnbalanced,
+        'animate-pulse bg-[var(--color-warning)]': isPendingDelete
       }"
       @click="handleToggleSidebar"
     >
@@ -95,10 +116,26 @@
       </template>
 
       <template #amount>
-        <CurrencyText
-          :value="value"
-          :inverted-value="invertedValue"
-        />
+        <div class="flex items-center gap-1">
+          <CurrencyText
+            :value="value"
+            :inverted-value="invertedValue"
+          />
+          <NcIconSvgWrapper
+            v-if="isPendingDelete"
+            :path="mdiUndo"
+            :size="18"
+            :name="t('money', 'Undo')"
+            @click.stop="handleUndoDeleteTransaction"
+          />
+          <NcIconSvgWrapper
+            v-else
+            :path="mdiDelete"
+            :size="18"
+            :name="t('money', 'Delete transaction')"
+            @click.stop="handleDeleteTransaction"
+          />
+        </div>
       </template>
     </MobileTransactionListItemTemplate>
   </div>
@@ -110,6 +147,7 @@
   import {
     ref,
     type PropType,
+    type Ref,
     watch,
     computed,
     onMounted,
@@ -119,7 +157,7 @@
 
   import { translate as t } from '@nextcloud/l10n';
 
-  import { mdiMenuOpen, mdiClose } from '@mdi/js';
+  import { mdiMenuOpen, mdiClose, mdiDelete, mdiUndo } from '@mdi/js';
 
   import { NcIconSvgWrapper, NcLoadingIcon } from '@nextcloud/vue';
 
@@ -168,16 +206,35 @@
   const splits = ref<Array<Split>>([]);
   const transactionIdWatcher = ref<{ stop: () => void } | null>(null);
   const isLoading = ref(false);
+  const deleteTransactionTimeout: Ref<null | number> = ref(null);
 
   watch(
     () => props.transaction,
     async () => {
+      // The row may get recycled for another transaction while a delete is
+      // pending (virtual scrolling), so cancel it.
+      handleUndoDeleteTransaction();
+
       removeTransactionIdWatcher();
       await setTransactionIdWatcher();
     }
   );
 
+  const unbalancedValue = computed(() => {
+    return splits.value.reduce((value, s) => (value += s.value), 0.0);
+  });
+
+  const isUnbalanced = computed(() => {
+    return NumberUtils.areNotEqual(unbalancedValue.value, 0.0);
+  });
+
+  const isPendingDelete = computed(() => {
+    return deleteTransactionTimeout.value != null;
+  });
+
   const value = computed(() => {
+    if (props.accountId === undefined) return unbalancedValue.value;
+
     return splitsOfAccount.value.reduce((v, split) => {
       return (v += split.value);
     }, 0.0);
@@ -214,15 +271,7 @@
   });
 
   const valueIsEditable = computed(() => {
-    return !hasMultipleDestinationSplits.value;
-  });
-
-  const unbalancedValue = computed(() => {
-    return splits.value.reduce((value, s) => (value += s.value), 0.0);
-  });
-
-  const isUnbalanced = computed(() => {
-    return NumberUtils.areNotEqual(unbalancedValue.value, 0.0);
+    return props.accountId !== undefined && !hasMultipleDestinationSplits.value;
   });
 
   const excludedAccountIds = computed((): Array<number> => {
@@ -241,7 +290,10 @@
 
   async function handleOpenSidebar(): Promise<void> {
     await router.push({
-      name: 'transaction-details',
+      name:
+        route.name === 'unbalanced'
+          ? 'unbalanced-transaction-details'
+          : 'transaction-details',
       params: {
         transactionId: props.transaction.id.toString()
       }
@@ -249,9 +301,18 @@
   }
 
   async function handleCloseSidebar(): Promise<void> {
-    await router.push({
-      name: 'account'
-    });
+    if (route.name === 'unbalanced-transaction-details') {
+      await router.push({
+        name: 'unbalanced',
+        params: {
+          bookId: props.bookId
+        }
+      });
+    } else {
+      await router.push({
+        name: 'account'
+      });
+    }
   }
 
   async function handleToggleSidebar(): Promise<void> {
@@ -283,20 +344,56 @@
       throw new Error('cannot change value of multi-split-transaction');
 
     const split = splitOfDestinationAccount.value;
-    if (!split) {
-      // TODO
-    } else {
+    if (split) {
       split.value = -value;
       await handleSplitChanged(split);
+    } else {
+      // No split on any destination account exists yet, so there is no
+      // counter-split to negate the new value against. The change still lands
+      // via the split of the current account below; balancing the transaction
+      // continues in the sidebar.
     }
 
     const splitOfAcc = splitOfAccount.value;
     if (splitOfAcc) {
       splitOfAcc.value = value;
       await handleSplitChanged(splitOfAcc);
-    } else {
-      // TODO
+    } else if (props.accountId) {
+      await splitService.addSplit({
+        transactionId: props.transaction.id,
+        destAccountId: props.accountId,
+        value: value,
+        convertRate: 1.0,
+        description: ''
+      });
     }
+  }
+
+  function handleDeleteTransaction(): void {
+    if (deleteTransactionTimeout.value != null) return;
+
+    const transactionId = props.transaction.id;
+
+    deleteTransactionTimeout.value = window.setTimeout(() => {
+      deleteTransactionTimeout.value = null;
+
+      if (props.transaction.id !== transactionId) return;
+
+      void handleConfirmedDeleteTransaction();
+    }, 10000);
+  }
+
+  function handleUndoDeleteTransaction(): void {
+    if (deleteTransactionTimeout.value != null) {
+      window.clearTimeout(deleteTransactionTimeout.value);
+      deleteTransactionTimeout.value = null;
+    }
+  }
+
+  async function handleConfirmedDeleteTransaction(): Promise<void> {
+    if (isOpenInSidebar.value) await handleCloseSidebar();
+
+    await transactionService.deleteTransaction(props.transaction);
   }
 
   async function handleDestinationAccountChanged(

@@ -42,6 +42,7 @@
             :excluded-account-ids="excludedAccountIds"
             :editable="editable"
             :inverted-value="isInvertedAccount"
+            @transaction-deleted="handleTransactionDeleted"
           />
 
           <SplitInput
@@ -53,6 +54,7 @@
             :excluded-account-ids="excludedAccountIds"
             :editable="editable"
             :inverted-value="isInvertedAccount"
+            @transaction-deleted="handleTransactionDeleted"
           />
 
           <div
@@ -94,7 +96,7 @@
 
 <script setup lang="ts">
   import { computed, onMounted, onUnmounted, ref, watch, type Ref } from 'vue';
-  import { useRouter } from 'vue-router';
+  import { useRoute, useRouter } from 'vue-router';
   import dayjs from 'dayjs';
 
   import { translate as t } from '@nextcloud/l10n';
@@ -139,6 +141,7 @@
   const splitService = useSplitService();
 
   const router = useRouter();
+  const route = useRoute();
 
   const props = defineProps({
     bookId: {
@@ -235,7 +238,20 @@
   });
 
   async function handleCloseSidebar(): Promise<void> {
-    await router.push({ name: 'account' });
+    if (route.name === 'unbalanced-transaction-details') {
+      await router.push({
+        name: 'unbalanced',
+        params: {
+          bookId: props.bookId
+        }
+      });
+    } else {
+      await router.push({ name: 'account' });
+    }
+  }
+
+  async function handleTransactionDeleted(): Promise<void> {
+    await handleCloseSidebar();
   }
 
   async function handleDescriptionChanged(

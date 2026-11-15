@@ -35,7 +35,7 @@ class Version14Date20231010133500 extends SimpleMigrationStep {
 
     // The column was already created as a string type in Version02Date20220821220000,
     // so only the length/default/notnull options need adjusting here. Typed setters are
-    // used instead of a changeColumn() options array with a Doctrine\DBAL type instance,
+    // used instead of a changeColumn() options array with a Doctrine DBAL type instance,
     // which is no longer part of the public API in Nextcloud 35's DBAL wrapper.
     $descriptionColumn = $accountsTable->getColumn('description');
     $descriptionColumn->setLength(1024);
