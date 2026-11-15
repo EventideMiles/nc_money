@@ -1,4 +1,9 @@
 {
+  "allowScripts": {
+    "esbuild@0.28.1": true,
+    "core-js@3.37.0": false,
+    "fsevents@2.3.3": true
+  },
   "name": "money",
   "version": "0.33.2",
   "description": "",
@@ -45,7 +50,7 @@
     "csv-parse": "^7.0.2",
     "dayjs": "^1.11.4",
     "dotenv-cli": "^6.0.0",
-    "esbuild": "^0.28.1",
+    "esbuild": "0.28.1",
     "eslint": "^8.33.0",
     "eslint-config-prettier": "^9.0.0",
     "eslint-plugin-tailwindcss": "^3.8.3",
