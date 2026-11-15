@@ -1,0 +1,132 @@
+name: Compatibility canary
+
+# Deprecation radar: weekly canary against the newest Nextcloud server lines.
+# A red run means a new Nextcloud release broke something in this app — fix it
+# before upgrading the AIO instance.
+
+on:
+  schedule:
+    # Sundays 03:17 UTC — low-traffic hour.
+    # Note: scheduled runs only fire from the default branch (master) — the cron
+    # arms when this branch merges; workflow_dispatch works from any branch.
+    - cron: '17 3 * * 0'
+  workflow_dispatch:
+
+env:
+  APP_NAME: money
+
+jobs:
+  resolve:
+    runs-on: ubuntu-latest
+    outputs:
+      matrix: ${{ steps.resolve.outputs.matrix }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - run: npm ci
+
+      - name: Resolve latest Nextcloud releases
+        id: resolve
+        run: |
+          # SMillerDev/nextcloud-actions/setup-nextcloud clones the server with
+          # `git clone --branch=<version>` (action.yml: "The Nextcloud version to
+          # set up, git branch or tag"), so `version` accepts any nextcloud/server
+          # branch or tag. Mapping used here:
+          #   - latest stable release vX.Y.Z -> its `stableXX` maintenance branch,
+          #     so the canary follows the line instead of a frozen tag
+          #   - latest pre-release tag (vNN.N.NbetaN / vNN.N.NrcN, e.g. a 36 beta)
+          #     -> used verbatim as a tag
+          releases=$(curl -sf -H "Authorization: Bearer ${{ github.token }}" \
+            "https://api.github.com/repos/nextcloud/server/releases?per_page=100")
+          stable_tag=$(jq -r '[.[] | select(.prerelease == false and .draft == false)][0].tag_name' <<<"$releases")
+          prerelease_tag=$(jq -r '([.[] | select(.prerelease == true)][0].tag_name // empty)' <<<"$releases")
+          echo "Latest stable tag: ${stable_tag}"
+          echo "Latest prerelease tag: ${prerelease_tag:-none}"
+
+          major=${stable_tag#v}
+          stable_branch="stable${major%%.*}"
+
+          # If no beta/RC is out, the matrix is just the latest stable line.
+          matrix=$(jq -cn --arg stable "$stable_branch" --arg pre "$prerelease_tag" \
+            'if $pre == "" then [$stable] else [$stable, $pre] end')
+          echo "matrix=$matrix" >> "$GITHUB_OUTPUT"
+
+      - name: Report frontend dependency drift (warning only)
+        continue-on-error: true
+        run: |
+          {
+            echo '### npm outdated'
+            echo '```'
+            npm outdated --long || true
+            echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"
+
+  integration:
+    needs: resolve
+    runs-on: ubuntu-latest
+    container: shivammathur/node:latest
+    continue-on-error: false
+
+    # Duplicated from integration-tests.yml instead of reusing it via
+    # workflow_call: GitHub Actions cannot feed a dynamic (API-resolved) matrix
+    # through a reusable workflow without rebuilding integration-tests.yml's
+    # matrix from inputs, and the primary CI workflow should stay untouched.
+    strategy:
+      fail-fast: false
+      matrix:
+        nextcloud_version: ${{ fromJSON(needs.resolve.outputs.matrix) }}
+
+    name: Canary integration tests on ${{ matrix.nextcloud_version }}
+
+    services:
+      pgsql:
+        image: ghcr.io/nextcloud/continuous-integration-postgres-15:latest
+        env:
+          POSTGRES_USER: nextcloud
+          POSTGRES_DB: nextcloud
+          POSTGRES_PASSWORD: nextcloud
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup PHP for PostgreSQL
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.4'
+          extensions: gd, pdo_pgsql
+          coverage: none
+
+      - name: Set up server with PostgreSQL
+        uses: SMillerDev/nextcloud-actions/setup-nextcloud@main
+        with:
+          cron: false
+          version: ${{ matrix.nextcloud_version }}
+          database-type: pgsql
+          database-host: pgsql
+          database-port: 5432
+          database-name: nextcloud
+          database-user: nextcloud
+          database-password: nextcloud
+
+      - name: Setup app
+        run: |
+          mkdir -p ../server/apps/${{ env.APP_NAME }} && \
+          cp -R ./ ../server/apps/${{ env.APP_NAME }}
+
+      - name: Install dependencies
+        run: composer install
+        working-directory: ../server/apps/${{ env.APP_NAME }}
+
+      - name: Run integration tests
+        run: composer run test:integration
+        working-directory: ../server/apps/${{ env.APP_NAME }}

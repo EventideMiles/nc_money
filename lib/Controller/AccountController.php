@@ -160,7 +160,8 @@ class AccountController extends MoneyController {
       $year = $row['year'];
       $month = $row['month'];
 
-      if (!is_null($balance) && !is_null($year) && !is_null($month)) {
+      // $balance is cast to float above, so it can never be null
+      if (!is_null($year) && !is_null($month)) {
         $account['stats'][$year][$month] = [
           'value' => $balance,
           'balance' => $running_balance

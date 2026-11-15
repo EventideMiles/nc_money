@@ -7,23 +7,16 @@ use OCP\Util;
 
 use OCP\AppFramework\Controller;
 use OCP\AppFramework\Http\TemplateResponse;
-use OCP\AppFramework\Http\ContentSecurityPolicy;
 use OCP\AppFramework\Http\Attribute\NoAdminRequired;
 use OCP\AppFramework\Http\Attribute\NoCSRFRequired;
-use OCP\IConfig;
 
 class PageController extends Controller {
 
-  private IConfig $config;
-
   public function __construct(
     string $AppName,
-    IRequest $request,
-    IConfig $config
+    IRequest $request
   ) {
     parent::__construct($AppName, $request);
-
-    $this->config = $config;
   }
 
   #[NoAdminRequired]
@@ -33,12 +26,6 @@ class PageController extends Controller {
     Util::addStyle($this->appName, 'money-main');
 
     $response = new TemplateResponse($this->appName, 'main');
-
-    if($this->config->getSystemValue('debug')) {
-      $csp = new ContentSecurityPolicy();
-      $csp->allowEvalScript(true);
-      $response->setContentSecurityPolicy($csp);
-    }
 
     return $response;
   }

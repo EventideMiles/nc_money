@@ -4,6 +4,7 @@
 
 ### Added
 
+- Deprecation radar for the fork: phpstan with Nextcloud's deprecation rules (pinned to the NC 35 OCP stubs via `nextcloud/ocp`, run as `composer run test:static` and in CI), Dependabot weekly grouped updates for npm/composer and monthly for GitHub Actions, and a weekly "compatibility canary" workflow running the integration tests against the latest Nextcloud stable line and any beta/RC, plus an npm-outdated drift report
 - Delete transactions end-to-end: per-row delete with 10s undo window in the transaction list (desktop & mobile)
 - Per-split delete button with 10s undo window in the transaction sidebar; deleting the last split of a transaction now deletes the transaction as well
 - Unbalanced transactions view listing all transactions whose splits don't sum to zero, reachable via the "Unbalanced" book navigation entry

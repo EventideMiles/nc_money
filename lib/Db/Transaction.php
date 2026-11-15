@@ -6,6 +6,16 @@ use JsonSerializable;
 
 use OCP\AppFramework\Db\Entity;
 
+/**
+ * @method string getDescription()
+ * @method void setDescription(string $description)
+ * @method string getDate()
+ * @method void setDate(string $date)
+ * @method int getTimestampAdded()
+ * @method void setTimestampAdded(int $timestampAdded)
+ * @method string getUserId()
+ * @method void setUserId(string $userId)
+ */
 class Transaction extends Entity implements JsonSerializable {
 
   protected $description;
@@ -17,7 +27,7 @@ class Transaction extends Entity implements JsonSerializable {
 
   }
 
-  public function jsonSerialize() {
+  public function jsonSerialize(): array {
     return [
       'id' => $this->id,
       'description' => $this->description,
