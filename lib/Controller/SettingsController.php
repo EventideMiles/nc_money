@@ -7,6 +7,8 @@ use OCP\IRequest;
 
 use OCP\AppFramework\Http\DataResponse;
 use OCP\AppFramework\Controller;
+use OCP\AppFramework\Http\Attribute\NoAdminRequired;
+use OCP\AppFramework\Http\Attribute\NoCSRFRequired;
 
 class SettingsController extends Controller {
 
@@ -25,10 +27,8 @@ class SettingsController extends Controller {
     $this->settings = $settings;
   }
 
-  /**
-   * @NoCSRFRequired
-   * @NoAdminRequired
-   */
+  #[NoCSRFRequired]
+  #[NoAdminRequired]
   public function getSettings() {
     $settings = [
       'useInvertedAccounts' => 'bool',
@@ -63,10 +63,8 @@ class SettingsController extends Controller {
     return $data;
   }
 
-  /**
-   * @NoCSRFRequired
-   * @NoAdminRequired
-   */
+  #[NoCSRFRequired]
+  #[NoAdminRequired]
   public function updateSettings(
     $useInvertedAccounts,
     $incomeExpenseAccountsValueFormat,

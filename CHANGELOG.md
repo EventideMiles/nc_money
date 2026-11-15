@@ -1,5 +1,28 @@
 ## [Unreleased]
 
+## [0.33.0] - 2026-11-14
+
+### Added
+
+- Deprecation radar for the fork: phpstan with Nextcloud's deprecation rules (pinned to the NC 35 OCP stubs via `nextcloud/ocp`, run as `composer run test:static` and in CI), Dependabot weekly grouped updates for npm/composer and monthly for GitHub Actions, and a weekly "compatibility canary" workflow running the integration tests against the latest Nextcloud stable line and any beta/RC, plus an npm-outdated drift report
+- Delete transactions end-to-end: per-row delete with 10s undo window in the transaction list (desktop & mobile)
+- Per-split delete button with 10s undo window in the transaction sidebar; deleting the last split of a transaction now deletes the transaction as well
+- Unbalanced transactions view listing all transactions whose splits don't sum to zero, reachable via the "Unbalanced" book navigation entry
+
+### Fixed
+
+- Changing the value of a transaction without a split on the current account no longer silently drops the change; the missing split is created instead
+- Balances stay correct when changing a transaction's date
+
+### Changed
+
+- Nextcloud 35 compatibility: DBAL-4-safe migrations (typed column setters instead of `Doctrine\DBAL\Types\Type` instances) and PHP attributes instead of legacy controller annotations
+- Raise Nextcloud max-version to 99 (personal fork, sideloaded — avoid future version gates; min-version stays 30, so the legacy `agpl` licence shorthand remains valid)
+- Ship stylesheets from `css/` instead of the `../js/` path-escape hack in `Util::addStyle` call sites
+- Refresh @nextcloud libraries: router 3, l10n 3, dialogs 8, axios 2.6 (toast styles are now bundled by dialogs itself)
+- CI: run integration tests against stable34 and stable35, build releases on stable35
+- CI: pin PR check jobs to Node 24 (lockfile requires npm 11)
+
 ## [0.32.0] - 2026-07-18
 
 - Enable app for NC 34

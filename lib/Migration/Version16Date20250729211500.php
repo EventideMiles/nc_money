@@ -8,8 +8,6 @@ use Closure;
 use OCP\DB\ISchemaWrapper;
 use OCP\Migration\IOutput;
 use OCP\Migration\SimpleMigrationStep;
-use OCP\DB\Types;
-use Doctrine\DBAL\Types\Type;
 
 /**
  * Auto-generated migration step: Please modify to your needs!
@@ -27,21 +25,21 @@ class Version16Date20250729211500 extends SimpleMigrationStep {
 
     $transactionsTable = $schema->getTable('money_transactions');
 
-    $transactionsTable->changeColumn('description', [
-      'type' => Type::getType(Types::STRING),
-      'length' => 1024,
-      'default' => '',
-      'notnull' => false
-    ]);
+    // The column was already created as a string type in Version02Date20220821220000,
+    // so only the length/default/notnull options need adjusting here. Typed setters are
+    // used instead of a changeColumn() options array with a Doctrine DBAL type instance,
+    // which is no longer part of the public API in Nextcloud 35's DBAL wrapper.
+    $transactionsDescriptionColumn = $transactionsTable->getColumn('description');
+    $transactionsDescriptionColumn->setLength(1024);
+    $transactionsDescriptionColumn->setDefault('');
+    $transactionsDescriptionColumn->setNotnull(false);
 
     $splitsTable = $schema->getTable('money_splits');
 
-    $splitsTable->changeColumn('description', [
-      'type' => Type::getType(Types::STRING),
-      'length' => 1024,
-      'default' => '',
-      'notnull' => false
-    ]);
+    $splitsDescriptionColumn = $splitsTable->getColumn('description');
+    $splitsDescriptionColumn->setLength(1024);
+    $splitsDescriptionColumn->setDefault('');
+    $splitsDescriptionColumn->setNotnull(false);
 
     return $schema;
   }

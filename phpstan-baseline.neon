@@ -1,0 +1,22 @@
+parameters:
+	ignoreErrors:
+		# OCP\Config\IUserConfig is @since 32.0.0 but this app still declares
+		# min-version 30 (appinfo/info.xml). Swap IConfig::getUserValue/setUserValue
+		# for IUserConfig when the minimum supported Nextcloud version rises to 32.
+		-
+			message: '''
+				#^Call to deprecated method getUserValue\(\) of interface OCP\\IConfig\:
+				33\.0\.0 \- use \{@see IUserConfig\} directly$#
+			'''
+			identifier: method.deprecated
+			count: 1
+			path: lib/Controller/SettingsController.php
+
+		-
+			message: '''
+				#^Call to deprecated method setUserValue\(\) of interface OCP\\IConfig\:
+				33\.0\.0 \- use \{@see IUserConfig\} directly$#
+			'''
+			identifier: method.deprecated
+			count: 1
+			path: lib/Controller/SettingsController.php

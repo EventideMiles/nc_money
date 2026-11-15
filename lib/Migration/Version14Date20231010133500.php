@@ -9,7 +9,6 @@ use OCP\DB\ISchemaWrapper;
 use OCP\Migration\IOutput;
 use OCP\Migration\SimpleMigrationStep;
 use OCP\DB\Types;
-use Doctrine\DBAL\Types\Type;
 
 /**
  * Auto-generated migration step: Please modify to your needs!
@@ -34,12 +33,14 @@ class Version14Date20231010133500 extends SimpleMigrationStep {
       ]);
     }
 
-    $accountsTable->changeColumn('description', [
-      'type' => Type::getType(Types::STRING),
-      'length' => 1024,
-      'default' => '',
-      'notnull' => false
-    ]);
+    // The column was already created as a string type in Version02Date20220821220000,
+    // so only the length/default/notnull options need adjusting here. Typed setters are
+    // used instead of a changeColumn() options array with a Doctrine DBAL type instance,
+    // which is no longer part of the public API in Nextcloud 35's DBAL wrapper.
+    $descriptionColumn = $accountsTable->getColumn('description');
+    $descriptionColumn->setLength(1024);
+    $descriptionColumn->setDefault('');
+    $descriptionColumn->setNotnull(false);
 
     return $schema;
   }

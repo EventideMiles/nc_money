@@ -9,6 +9,7 @@ use OCP\AppFramework\Db\MultipleObjectsReturnedException;
 
 use OCA\Money\Db\Transaction;
 use OCA\Money\Db\TransactionMapper;
+use OCA\Money\Db\SplitMapper;
 
 use OCA\Money\AuditTrait;
 
@@ -17,9 +18,11 @@ class TransactionService {
   use AuditTrait;
 
   private $transactionMapper;
+  private $splitMapper;
 
-  public function __construct(TransactionMapper $transactionMapper) {
+  public function __construct(TransactionMapper $transactionMapper, SplitMapper $splitMapper) {
     $this->transactionMapper = $transactionMapper;
+    $this->splitMapper = $splitMapper;
   }
 
   public function findAll($userId) {
@@ -95,6 +98,22 @@ class TransactionService {
 
   public function findUnbalancedTransactions($userId, $resultOffset = 0, $resultLimit = 50) {
     return $this->transactionMapper->findAllUnbalancedTransactions($userId, $resultOffset, $resultLimit);
+  }
+
+  public function delete(Transaction $transaction) {
+    $splits = $this->splitMapper->findAllSplitsOfTransaction($transaction->getUserId(), $transaction->getId());
+
+    foreach($splits as $split) {
+      $this->splitMapper->delete($split);
+
+      $this->emitDeleteAuditEvent($transaction->getUserId(), 'split', $split);
+    }
+
+    $this->transactionMapper->delete($transaction);
+
+    $this->emitDeleteAuditEvent($transaction->getUserId(), 'transaction', $transaction);
+
+    return $transaction;
   }
 
 }

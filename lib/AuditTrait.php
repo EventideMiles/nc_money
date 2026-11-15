@@ -20,6 +20,10 @@ trait AuditTrait {
     ]);
   }
 
+  /**
+   * @param Entity&\JsonSerializable $newEntity
+   * @param Entity&\JsonSerializable $oldEntity
+   */
   private function emitUpdateAuditEvents(
     string $userId,
     string $entityName,

@@ -1,4 +1,5 @@
 import { dirname, resolve } from 'path';
+import { mkdirSync, readdirSync, renameSync } from 'node:fs';
 
 import { build } from 'vite';
 
@@ -27,7 +28,10 @@ const bundles = [
 
 const mode = process.env.VITE_MODE ?? 'production';
 
-bundles.forEach(async (bundle) => {
+// Build each bundle sequentially: the IIFE JS bundles are written to ./js
+// (referenced via Util::addScript), the emitted CSS assets are moved to ./css
+// afterwards (referenced via Util::addStyle).
+for (const bundle of bundles) {
   await build({
     build: {
       lib: {
@@ -57,4 +61,16 @@ bundles.forEach(async (bundle) => {
       'process.env.NODE_ENV': JSON.stringify(mode)
     }
   });
-});
+}
+
+// Vite writes the CSS asset next to the JS bundle in ./js, but stylesheets are
+// served from ./css - move every emitted stylesheet there. This replaces the
+// old '../js/<name>' path-escape hack in the Util::addStyle call sites.
+const cssDir = resolve(__dirname, '../css');
+mkdirSync(cssDir, { recursive: true });
+const jsDir = resolve(__dirname, '../js');
+for (const file of readdirSync(jsDir)) {
+  if (file.endsWith('.css')) {
+    renameSync(resolve(jsDir, file), resolve(cssDir, file));
+  }
+}

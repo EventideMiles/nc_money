@@ -6,6 +6,20 @@ use JsonSerializable;
 
 use OCP\AppFramework\Db\Entity;
 
+/**
+ * @method int getTransactionId()
+ * @method void setTransactionId(int $transactionId)
+ * @method int getDestAccountId()
+ * @method void setDestAccountId(int $destAccountId)
+ * @method float getValue()
+ * @method void setValue(float $value)
+ * @method float getConvertRate()
+ * @method void setConvertRate(float $convertRate)
+ * @method string getDescription()
+ * @method void setDescription(string $description)
+ * @method string getUserId()
+ * @method void setUserId(string $userId)
+ */
 class Split extends Entity implements JsonSerializable {
 
   protected $transactionId;
@@ -22,7 +36,7 @@ class Split extends Entity implements JsonSerializable {
     $this->addType('convertRate', 'float');
   }
 
-  public function jsonSerialize() {
+  public function jsonSerialize(): array {
     return [
       'id' => $this->id,
       'transactionId' => $this->transactionId,

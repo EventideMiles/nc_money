@@ -1,0 +1,19 @@
+includes:
+	# Baseline: only entries for APIs deprecated since NC 33 that cannot be
+	# migrated yet (see comments on each entry).
+	- phpstan-baseline.neon
+	# Flags usages of APIs marked @deprecated — with nextcloud/ocp pinned to the
+	# NC 35 line (composer.json), new server-side deprecations surface here.
+	- vendor/phpstan/phpstan-deprecation-rules/rules.neon
+
+parameters:
+	paths:
+		- lib
+	excludePaths:
+		- tests
+	level: 5
+	# nextcloud/ocp ships the server's public API as plain stubs (no composer
+	# autoload map) — teach phpstan about the symbols without analysing them.
+	scanDirectories:
+		- vendor/nextcloud/ocp/OCP
+		- vendor/nextcloud/ocp/NCU

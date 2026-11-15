@@ -1,5 +1,6 @@
 node_modules
 js
+css
 .devcontainer
 *.tar.gz
 .env
@@ -9,3 +10,5 @@ translationfiles
 build/dist
 .vscode
 /vendor/
+.opencode/
+tsconfig.tsbuildinfo

@@ -103,6 +103,10 @@ class TransactionApiService {
     return await this.createTransactionFromResponseData(response.data);
   }
 
+  public async deleteTransaction(transactionId: number): Promise<void> {
+    await axios.delete(generateUrl(`apps/money/transactions/${transactionId}`));
+  }
+
   private async createTransactionFromResponseData(
     data: TransactionApiData | TransactionApiDataWithSplits
   ): Promise<Transaction> {

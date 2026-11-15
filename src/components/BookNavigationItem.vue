@@ -58,7 +58,15 @@
 
       <li class="border-t border-solid border-main-text" />
 
-      <NcAppNavigationItem :name="t('money', 'Unbalanced')">
+      <NcAppNavigationItem
+        :name="t('money', 'Unbalanced')"
+        :to="{
+          name: 'unbalanced',
+          params: {
+            bookId: book.id
+          }
+        }"
+      >
         <template #counter>
           <CurrencyText
             class="mr-2"
